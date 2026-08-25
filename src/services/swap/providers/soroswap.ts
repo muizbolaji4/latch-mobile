@@ -120,7 +120,7 @@ function isPoolHashesError(err: unknown): boolean {
 export const soroswapProvider: SwapProvider = {
   id: 'soroswap',
   name: 'Soroswap',
-  icon: require('@/src/assets/images/LiquidMesh.png'),
+  icon: require('@/src/assets/images/soroswap.png'),
 
   async getQuote(params: SwapQuoteParams): Promise<SwapQuote> {
     return mapQuote(await fetchRawQuote(params, PROTOCOLS), params);
