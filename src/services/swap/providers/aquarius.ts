@@ -128,7 +128,7 @@ async function poolsForPair(fromSacId: string, toSacId: string): Promise<Aquariu
 export const aquariusProvider: SwapProvider = {
   id: 'aquarius',
   name: 'Aquarius',
-  icon: require('@/src/assets/images/LiquidMesh.png'),
+  icon: require('@/src/assets/images/aquarius.png'),
 
   async getQuote(params: SwapQuoteParams): Promise<SwapQuote> {
     const { fromSacId, toSacId, amountIn, slippageBps } = params;
