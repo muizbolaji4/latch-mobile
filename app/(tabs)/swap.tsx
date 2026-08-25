@@ -509,164 +509,194 @@ const Swap = () => {
             </Box>
           </TouchableOpacity>
 
-          {/* Swap Details — shown only once a real quote has been fetched */}
-          {quote && toToken && (
+          {/* Swap Details — Route row is always shown when an amount is entered so
+              the user can switch providers even when the current one has no usable
+              quote. Rate/slippage/min-received are only meaningful once a quote
+              has come back, so they stay behind the quote guard. */}
+          {fromToken && toToken && amountNum > 0 && (
             <Box mt="xl">
+              {/* Route / provider picker row */}
               <Box flexDirection="row" justifyContent="space-between" alignItems="center" mb="m">
                 <Text variant="p7" color="textSecondary">
                   Route
                 </Text>
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => setShowRoutePicker(true)}
-                  disabled={availableProviders.length < 2}
-                  style={{ flexDirection: 'row', alignItems: 'center' }}
-                >
-                  <Image
-                    source={provider.icon}
-                    style={{ width: 24, height: 24, borderRadius: 6, marginRight: 8 }}
-                  />
-                  <Text variant="p7" color="textPrimary" style={{ marginRight: 8 }}>
-                    {provider.name}
-                  </Text>
-                  {provider.id === availableProviders[0]?.id && (
+                {availableProviders.length < 2 ? (
+                  // Single-provider network (testnet) — show the provider name
+                  // with a label instead of a dead tappable control.
+                  <Box flexDirection="row" alignItems="center">
+                    <Image
+                      source={provider.icon}
+                      style={{ width: 24, height: 24, borderRadius: 6, marginRight: 8 }}
+                    />
+                    <Text variant="p7" color="textPrimary" style={{ marginRight: 8 }}>
+                      {provider.name}
+                    </Text>
                     <Box
-                      backgroundColor="bg800"
                       paddingHorizontal="s"
                       paddingVertical="xs"
                       borderRadius={4}
-                      style={{ backgroundColor: '#211B0C' }}
+                      style={{ backgroundColor: '#1A1A2E' }}
                     >
-                      <Text variant="p8" color="primary" style={{ fontSize: 10 }}>
-                        Recommend
+                      <Text variant="p8" color="textSecondary" style={{ fontSize: 10 }}>
+                        Only on this network
                       </Text>
                     </Box>
-                  )}
-                  {availableProviders.length > 1 && (
+                  </Box>
+                ) : (
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() => setShowRoutePicker(true)}
+                    style={{ flexDirection: 'row', alignItems: 'center' }}
+                  >
+                    <Image
+                      source={provider.icon}
+                      style={{ width: 24, height: 24, borderRadius: 6, marginRight: 8 }}
+                    />
+                    <Text variant="p7" color="textPrimary" style={{ marginRight: 8 }}>
+                      {provider.name}
+                    </Text>
+                    {provider.id === availableProviders[0]?.id && (
+                      <Box
+                        backgroundColor="bg800"
+                        paddingHorizontal="s"
+                        paddingVertical="xs"
+                        borderRadius={4}
+                        style={{ backgroundColor: '#211B0C' }}
+                      >
+                        <Text variant="p8" color="primary" style={{ fontSize: 10 }}>
+                          Recommend
+                        </Text>
+                      </Box>
+                    )}
                     <Ionicons
                       name="chevron-forward"
                       size={14}
                       color={theme.colors.textSecondary}
                       style={{ marginLeft: 8 }}
                     />
-                  )}
-                </TouchableOpacity>
+                  </TouchableOpacity>
+                )}
               </Box>
 
-              <Box flexDirection="row" justifyContent="space-between" alignItems="center" mb="m">
-                <Text variant="p7" color="textSecondary">
-                  Rate
-                </Text>
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => setShowUsdRate((v) => !v)}
-                  style={{ flexDirection: 'row', alignItems: 'center' }}
-                >
-                  <Text variant="p7" color="textPrimary" style={{ marginRight: 4 }}>
-                    {rateLabel}
-                  </Text>
-                  <Animated.View style={animatedIconStyle2}>
-                    <SwapIcon width={14} color={theme.colors.white} />
-                  </Animated.View>
-                </TouchableOpacity>
-              </Box>
+              {/* Quote-dependent rows — only render once we have a real result */}
+              {quote && toToken && (
+                <>
+                  <Box flexDirection="row" justifyContent="space-between" alignItems="center" mb="m">
+                    <Text variant="p7" color="textSecondary">
+                      Rate
+                    </Text>
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      onPress={() => setShowUsdRate((v) => !v)}
+                      style={{ flexDirection: 'row', alignItems: 'center' }}
+                    >
+                      <Text variant="p7" color="textPrimary" style={{ marginRight: 4 }}>
+                        {rateLabel}
+                      </Text>
+                      <Animated.View style={animatedIconStyle2}>
+                        <SwapIcon width={14} color={theme.colors.white} />
+                      </Animated.View>
+                    </TouchableOpacity>
+                  </Box>
 
-              <Box flexDirection="row" justifyContent="space-between" alignItems="center" mb="m">
-                <Text variant="p7" color="textSecondary">
-                  Slippage
-                </Text>
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => setShowSlippageOptions((v) => !v)}
-                  style={{ flexDirection: 'row', alignItems: 'center' }}
-                >
-                  <Text variant="p7" color="textPrimary" style={{ marginRight: 4 }}>
-                    {(slippageBps / 100).toFixed(slippageBps % 100 === 0 ? 1 : 2)}%
-                  </Text>
-                  <Ionicons
-                    name={showSlippageOptions ? 'chevron-up' : 'chevron-down'}
-                    size={14}
-                    color={theme.colors.textSecondary}
-                  />
-                </TouchableOpacity>
-              </Box>
+                  <Box flexDirection="row" justifyContent="space-between" alignItems="center" mb="m">
+                    <Text variant="p7" color="textSecondary">
+                      Slippage
+                    </Text>
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      onPress={() => setShowSlippageOptions((v) => !v)}
+                      style={{ flexDirection: 'row', alignItems: 'center' }}
+                    >
+                      <Text variant="p7" color="textPrimary" style={{ marginRight: 4 }}>
+                        {(slippageBps / 100).toFixed(slippageBps % 100 === 0 ? 1 : 2)}%
+                      </Text>
+                      <Ionicons
+                        name={showSlippageOptions ? 'chevron-up' : 'chevron-down'}
+                        size={14}
+                        color={theme.colors.textSecondary}
+                      />
+                    </TouchableOpacity>
+                  </Box>
 
-              {showSlippageOptions && (
-                <Box flexDirection="row" alignItems="center" mb="m" flexWrap="wrap">
-                  {[10, 50, 100].map((bps) => {
-                    const selected = slippageBps === bps && !customSlippage;
-                    return (
-                      <TouchableOpacity
-                        key={bps}
-                        activeOpacity={0.7}
-                        onPress={() => {
-                          setCustomSlippage('');
-                          setSlippageBps(bps);
-                        }}
-                        style={{ marginRight: 8 }}
+                  {showSlippageOptions && (
+                    <Box flexDirection="row" alignItems="center" mb="m" flexWrap="wrap">
+                      {[10, 50, 100].map((bps) => {
+                        const selected = slippageBps === bps && !customSlippage;
+                        return (
+                          <TouchableOpacity
+                            key={bps}
+                            activeOpacity={0.7}
+                            onPress={() => {
+                              setCustomSlippage('');
+                              setSlippageBps(bps);
+                            }}
+                            style={{ marginRight: 8 }}
+                          >
+                            <Box
+                              paddingHorizontal="m"
+                              paddingVertical="s"
+                              borderRadius={8}
+                              backgroundColor={selected ? 'primary' : 'bg900'}
+                            >
+                              <Text variant="p8" color={selected ? 'bgDark900' : 'textPrimary'}>
+                                {(bps / 100).toFixed(1)}%
+                              </Text>
+                            </Box>
+                          </TouchableOpacity>
+                        );
+                      })}
+                      <Box
+                        flexDirection="row"
+                        alignItems="center"
+                        paddingHorizontal="m"
+                        paddingVertical="s"
+                        borderRadius={8}
+                        backgroundColor="bg900"
                       >
-                        <Box
-                          paddingHorizontal="m"
-                          paddingVertical="s"
-                          borderRadius={8}
-                          backgroundColor={selected ? 'primary' : 'bg900'}
-                        >
-                          <Text variant="p8" color={selected ? 'bgDark900' : 'textPrimary'}>
-                            {(bps / 100).toFixed(1)}%
-                          </Text>
-                        </Box>
-                      </TouchableOpacity>
-                    );
-                  })}
-                  <Box
-                    flexDirection="row"
-                    alignItems="center"
-                    paddingHorizontal="m"
-                    paddingVertical="s"
-                    borderRadius={8}
-                    backgroundColor="bg900"
-                  >
-                    <TextInput
-                      style={styles.slippageInput}
-                      value={customSlippage}
-                      onChangeText={applyCustomSlippage}
-                      placeholder="Custom"
-                      placeholderTextColor={theme.colors.textSecondary}
-                      keyboardType="decimal-pad"
-                    />
-                    <Text variant="p8" color="textSecondary">
-                      %
+                        <TextInput
+                          style={styles.slippageInput}
+                          value={customSlippage}
+                          onChangeText={applyCustomSlippage}
+                          placeholder="Custom"
+                          placeholderTextColor={theme.colors.textSecondary}
+                          keyboardType="decimal-pad"
+                        />
+                        <Text variant="p8" color="textSecondary">
+                          %
+                        </Text>
+                      </Box>
+                    </Box>
+                  )}
+
+                  <Box flexDirection="row" justifyContent="space-between" alignItems="center" mb="m">
+                    <Text variant="p7" color="textSecondary">
+                      Min. Received
+                    </Text>
+                    <Text variant="p7" color="textPrimary">
+                      {quote.minReceived} {toToken.code}
                     </Text>
                   </Box>
-                </Box>
+
+                  <Box flexDirection="row" justifyContent="space-between" alignItems="center" mb="m">
+                    <Text variant="p7" color="textSecondary">
+                      Price Impact
+                    </Text>
+                    <Text variant="p7" color="textPrimary">
+                      {quote.priceImpactPct.toFixed(2)}%
+                    </Text>
+                  </Box>
+
+                  <Box flexDirection="row" justifyContent="space-between" alignItems="center" mb="m">
+                    <Text variant="p7" color="textSecondary">
+                      Network Fee
+                    </Text>
+                    <Text variant="p7" color="textPrimary">
+                      Sponsored
+                    </Text>
+                  </Box>
+                </>
               )}
-
-              <Box flexDirection="row" justifyContent="space-between" alignItems="center" mb="m">
-                <Text variant="p7" color="textSecondary">
-                  Min. Received
-                </Text>
-                <Text variant="p7" color="textPrimary">
-                  {quote.minReceived} {toToken.code}
-                </Text>
-              </Box>
-
-              <Box flexDirection="row" justifyContent="space-between" alignItems="center" mb="m">
-                <Text variant="p7" color="textSecondary">
-                  Price Impact
-                </Text>
-                <Text variant="p7" color="textPrimary">
-                  {quote.priceImpactPct.toFixed(2)}%
-                </Text>
-              </Box>
-
-              <Box flexDirection="row" justifyContent="space-between" alignItems="center" mb="m">
-                <Text variant="p7" color="textSecondary">
-                  Network Fee
-                </Text>
-                <Text variant="p7" color="textPrimary">
-                  Sponsored
-                </Text>
-              </Box>
             </Box>
           )}
         </Box>
@@ -687,6 +717,10 @@ const Swap = () => {
         selectedId={provider.id}
         onClose={() => setShowRoutePicker(false)}
         onSelect={(id) => {
+          // Invalidate the cache for the previous provider so keepPreviousData
+          // doesn't show stale data from the old provider while the new quote
+          // is in flight.
+          queryClient.invalidateQueries({ queryKey: ['swap-quote'] });
           setSelectedProviderId(id);
           setShowRoutePicker(false);
         }}
